@@ -206,3 +206,64 @@ You can use the `setup` module with the **`ansible`** command to collect system 
 ```bash
 ansible all -m setup -i inventory.ini
 ```
+
+## Ansible Inventory Guide
+
+This guide will help you understand how to use and create an **Ansible inventory** file to manage your remote systems.
+
+### What is an Ansible Inventory?
+
+An **inventory** in Ansible is a file that contains the list of systems (hosts) you want to manage. It can be a simple file, or more complex with variables, groups, and specific configurations for each host.
+
+The inventory can be written in two formats:
+1. **INI format** (default format)
+2. **YAML format** (alternative format)
+
+Ansible will use this inventory file to know which systems to target when running playbooks or ad-hoc commands.
+
+### Creating a Simple Inventory File (INI Format)
+
+An inventory file can be as simple as listing hostnames or IP addresses. Here’s an example of an inventory file in **INI format**.
+
+#### Example Inventory File (`inventory.ini`):
+
+```ini
+[webservers]
+web1.example.com
+web2.example.com
+
+[dbservers]
+db1.example.com
+db2.example.com
+```
+
+## Ansible Configuration File Guide
+
+This guide explains the **Ansible configuration file** (`ansible.cfg`) and how to use it to customize how Ansible works.
+
+### What is the Ansible Configuration File?
+
+The **Ansible configuration file** is where you can set up different options for Ansible. It helps control how Ansible behaves, such as where to find your inventory, what user to log in as, and how to connect to remote systems.
+
+The configuration file is written in a simple format called **INI format**. It contains sections with settings that Ansible will use to run tasks.
+
+### Basic Structure of the Configuration File
+
+The configuration file is divided into sections. Each section contains **key-value pairs** that define specific settings.
+
+#### Example Configuration (`ansible.cfg`):
+
+```ini
+[defaults]
+inventory = ./inventory.ini
+remote_user = ubuntu
+private_key_file = /path/to/key.pem
+host_key_checking = False
+log_path = ./ansible.log
+
+[privilege_escalation]
+become = True
+become_method = sudo
+become_user = root
+```
+
