@@ -48,8 +48,8 @@ sudo yum install ansible   # For Red Hat-based systems
 
 ### Explanation of the Playbook:
 
-- 1. **Install Apache:** The playbook uses the yum module to install the httpd package (Apache) on the system.
-- 2. **Start Apache Service:** The playbook uses the service module to start the Apache service and ensures that it starts automatically on boot (enabled: yes).
+- **Install Apache:** The playbook uses the yum module to install the httpd package (Apache) on the system.
+- **Start Apache Service:** The playbook uses the service module to start the Apache service and ensures that it starts automatically on boot (enabled: yes).
 
 ### Run the Playbook
 
@@ -109,7 +109,7 @@ sudo apt install ansible   # For Ubuntu
 
 ### Explanation of the Playbook:
 
-- 1. **Install Apache:** The playbook uses the apt module to install the apache2 package (Apache web server) on the Ubuntu system.
+- **Install Apache:** The playbook uses the apt module to install the apache2 package (Apache web server) on the Ubuntu system.
 - **Start Apache Service:** The playbook uses the service module to start the Apache service and ensures it starts automatically on boot (enabled: yes).
 
 ### Run the Playbook
@@ -126,7 +126,7 @@ This guide explains how to use Ansible to install **Apache** (a web server) on *
 
 ### **Notify**:
 - **Notify** is a way to tell Ansible to run another task **only if something changes**. 
-- For example, if Ansible installs Apache, it will notify another task to restart Apache. But this only happens **if** Apache was actually installed or updated.
+- **For example**, if Ansible installs Apache, it will notify another task to restart Apache. But this only happens **if** Apache was actually installed or updated.
 
 ### **Handlers**:
 - **Handlers** are special tasks that only run if they are notified.
