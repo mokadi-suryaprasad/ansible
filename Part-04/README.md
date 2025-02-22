@@ -413,3 +413,162 @@ The playbook uses **conditional statements** to check the system type and remove
         enabled: no
       when: ansible_facts['os_family'] == "Debian"
 ```
+---
+
+# Ansible Playbook - Install Apache Web Server and Copy index.html
+
+## Overview
+
+This Ansible playbook helps you **install Apache Web Server** and **copy an `index.html` file** to the remote web server. It works on two types of systems:
+- **RedHat-based systems** (such as CentOS, RHEL, and Fedora)
+- **Debian-based systems** (such as Ubuntu and Debian)
+
+The playbook performs the following tasks:
+1. Installs the Apache Web Server (`httpd` or `apache2`) based on the OS type.
+2. Starts the Apache service and ensures it starts on boot.
+3. Copies the `index.html` file from your local machine to the web server's document root.
+
+---
+
+## How It Works
+
+1. **For RedHat-based systems**:
+    - The playbook installs the `httpd` package using the `yum` package manager.
+    - It starts the Apache service and enables it to start on boot using `systemd`.
+
+2. **For Debian-based systems**:
+    - The playbook installs the `apache2` package using the `apt` package manager.
+    - It starts the Apache service and enables it to start on boot using `systemd`.
+
+3. **Copy Task**:
+    - The playbook copies an `index.html` file from your local machine to the remote server. This is typically placed in the `/var/www/html` directory, which is the default document root for Apache.
+
+---
+
+## Playbook Explanation
+
+```yaml
+---
+- name: Install Apache Web Server and Copy index.html
+  hosts: all
+  become: yes
+  tasks:
+    # Install Apache on Red Hat-based systems (RHEL, CentOS, Fedora)
+    - name: Install Apache on Red Hat
+      yum:
+        name: httpd
+        state: present
+      when: ansible_facts['os_family'] == "RedHat"
+
+    # Install Apache on Ubuntu-based systems (Debian, Ubuntu)
+    - name: Install Apache on Ubuntu
+      apt:
+        name: apache2
+        state: present
+      when: ansible_facts['os_family'] == "Debian"
+
+    # Start Apache on Red Hat-based systems
+    - name: Start Apache on Red Hat
+      systemd:
+        name: httpd
+        state: started
+        enabled: yes
+      when: ansible_facts['os_family'] == "RedHat"
+
+    # Start Apache on Ubuntu-based systems
+    - name: Start Apache on Ubuntu
+      systemd:
+        name: apache2
+        state: started
+        enabled: yes
+      when: ansible_facts['os_family'] == "Debian"
+
+    # Copy the index.html file to the remote server
+    - name: Copy index.html to the web server
+      copy:
+        src: /path/to/local/index.html  # Local path to your index.html file
+        dest: /var/www/html/index.html  # Destination path on the remote server
+        owner: root                    # Optional: Set the file owner
+        group: root                    # Optional: Set the file group
+        mode: '0644'                   # Optional: Set file permissions
+```
+---
+
+# Ansible Playbook - Install Multiple Software Packages
+
+## Overview
+
+This Ansible playbook is designed to **install multiple software packages** on remote servers. It works on two types of systems:
+- **RedHat-based systems** (e.g., CentOS, RHEL, Fedora)
+- **Debian-based systems** (e.g., Ubuntu, Debian)
+
+The playbook does the following:
+1. Installs a list of software packages on **RedHat-based** systems using the `yum` package manager.
+2. Installs a list of software packages on **Debian-based** systems using the `apt` package manager.
+
+### Software Packages Installed
+
+The playbook installs the following software on both system types:
+- **Nginx**: A web server.
+- **Git**: A version control system.
+- **Curl**: A tool to transfer data from or to a server.
+
+---
+
+## How It Works
+
+### For RedHat-based Systems (e.g., CentOS, RHEL, Fedora):
+1. The playbook uses the `yum` package manager to install the following packages:
+   - Nginx
+   - Git
+   - Curl
+
+### For Debian-based Systems (e.g., Ubuntu, Debian):
+1. The playbook uses the `apt` package manager to install the following packages:
+   - Nginx
+   - Git
+   - Curl
+
+### Looping Through Packages
+- The playbook uses the **loop** feature to install each package from the list one by one.
+
+---
+
+## Playbook Structure
+
+```yaml
+---
+- name: Install Multiple Software Packages
+  hosts: all
+  become: yes
+  tasks:
+    # Install software on RedHat-based systems
+    - name: Install software on RedHat-based systems
+      yum:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ redhat_packages }}"
+      when: ansible_facts['os_family'] == "RedHat"
+
+    # Install software on Debian-based systems
+    - name: Install software on Debian-based systems
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ debian_packages }}"
+      when: ansible_facts['os_family'] == "Debian"
+
+# Variables for software packages
+vars:
+  # List of packages for RedHat-based systems
+  redhat_packages:
+    - nginx
+    - git
+    - curl
+
+  # List of packages for Debian-based systems
+  debian_packages:
+    - nginx
+    - git
+    - curl
+```
