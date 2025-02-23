@@ -1,0 +1,45 @@
+---
+# This is a playbook to set up Tomcat on different systems
+- name: Setup Tomcat
+  hosts: all  # This means the playbook will run on all the servers listed in your inventory file
+  become: true  # This makes sure the tasks are executed with superuser (root) permissions
+  tasks:  # This section contains the steps to install and set up Tomcat
+
+  # Step 1: Install Java on RedHat-based systems (like CentOS, RHEL)
+  - name: install java
+    yum:  # We use yum to install packages on RedHat-based systems
+      name: java  # The name of the package to install is "java"
+      state: installed  # This ensures that the Java package is installed
+    when: ansible_os_family == "RedHat"  # This task will run only on RedHat-based systems
+
+  # Step 2: Install Java on Debian-based systems (like Ubuntu)
+  - name: install java on ubuntu
+    apt:  # We use apt to install packages on Debian-based systems like Ubuntu
+      name: default-jdk  # We install the default Java Development Kit (JDK)
+      state: present  # This ensures that Java is installed
+    when: ansible_os_family == "Debian"  # This task will run only on Debian-based systems
+
+  # Step 3: Download Tomcat tar file from the internet
+  - name: download tomcat packages
+    get_url:  # This module downloads a file from the internet
+      url: http://mirrors.estointernet.in/apache/tomcat/tomcat-8/v8.5.50/bin/apache-tomcat-8.5.50.tar.gz  # URL where the Tomcat tar file is located
+      dest: /opt  # This is the destination directory where Tomcat will be downloaded
+
+  # Step 4: Extract (untar) the downloaded Tomcat tar file
+  - name: untar apache packages
+    unarchive:  # This module extracts files from a tarball (compressed file)
+      src: /opt/apache-tomcat-8.5.50.tar.gz  # The path to the downloaded Tomcat tar file
+      dest: /opt  # The directory where the files will be extracted to
+      remote_src: yes  # This means the tar file is already on the remote server, so we don't need to upload it
+
+  # Step 5: Give permissions to the startup.sh file (so it can be executed)
+  - name: add execution permissions on startup.sh file
+    file:  # This module helps manage files and directories
+      path: /opt/apache-tomcat-8.5.50/bin/startup.sh  # Path to the startup.sh script that starts Tomcat
+      mode: 0777  # This gives full permissions to the file (read, write, execute)
+
+  # Step 6: Start the Tomcat service using the startup.sh script
+  - name: start tomcat services
+    shell: nohup ./startup.sh  # This command runs the startup.sh script in the background
+    args:
+      chdir: /opt/apache-tomcat-8.5.50/bin  # This makes sure we're in the correct directory to run the startup.sh script
