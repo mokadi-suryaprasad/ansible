@@ -368,3 +368,122 @@ ansible-playbook setup_web_server.yml --tags webserver_setup
 #### Example Use Case for Tags
 
 - Imagine you have a playbook that sets up a complete LAMP stack (Linux, Apache, MySQL, PHP). You only want to run the Apache setup one day and the MySQL setup another day. By tagging the tasks and running them individually, you can save time and focus on what’s needed.
+
+
+# HTTP Server Installation Playbook with Error Handling
+
+This Ansible playbook installs and configures Apache HTTP Server (`httpd` for RedHat-based systems and `apache2` for Debian-based systems). It also copies an `index.html` file to the web server and ensures that Apache is running. The playbook includes error handling to make sure that even if some tasks fail, the playbook can continue running or retry specific tasks.
+
+## Playbook Tasks
+
+1. **Install Apache HTTP Server (RedHat-based systems)**: 
+   - Installs `httpd` using the `yum` package manager for RedHat-based systems.
+
+2. **Start Apache service (RedHat-based systems)**: 
+   - Starts the Apache HTTP server service (`httpd`) if it is installed.
+
+3. **Install Apache HTTP Server (Debian-based systems)**: 
+   - Installs `apache2` using the `apt` package manager for Debian-based systems.
+
+4. **Start Apache service (Debian-based systems)**: 
+   - Starts the Apache HTTP server service (`apache2`) if it is installed.
+
+5. **Copy `index.html` to the Web Server**: 
+   - Copies the `index.html` file from `/opt/ansible/index.html` to the web server directory `/var/www/html`.
+
+## Error Handling
+
+### 1. **Ignoring Errors for Specific Tasks (`ignore_errors`)**
+
+Some tasks in this playbook might not be critical, and we don't want them to stop the entire playbook if they fail. For instance, when installing Apache (`httpd` or `apache2`), if the package installation fails, we will ignore the error and continue with the next tasks.
+
+Example:
+
+```yaml
+- name: Install package (RedHat-based systems)
+  yum:
+    name: httpd
+    state: installed
+  when: ansible_os_family == "RedHat"
+  ignore_errors: yes  # Ignore errors if yum installation fails
+```
+
+```yaml
+---
+- name: This playbook installs and configures httpd and apache2
+  hosts: all
+  become: true
+  tasks:
+    - name: Install Apache HTTPD (RedHat-based systems)
+      yum:
+        name: httpd
+        state: installed
+      when: ansible_os_family == "RedHat"
+      ignore_errors: yes  # Continue playbook even if yum installation fails
+      tags:
+        - apache
+
+    - name: Start Apache HTTPD service (RedHat-based systems)
+      service:
+        name: httpd
+        state: started
+      when: ansible_os_family == "RedHat"
+      failed_when: result.rc != 0  # Fail task if service fails to start
+      retries: 3
+      delay: 5
+      until: result.state == "started"  # Retry 3 times with a 5-second delay
+      tags:
+        - apache
+
+    - name: Install Apache2 (Debian-based systems)
+      apt:
+        name: apache2
+        state: present
+      when: ansible_os_family == "Debian"
+      ignore_errors: yes  # Continue playbook even if apt installation fails
+      tags:
+        - apache
+
+    - name: Start Apache2 service (Debian-based systems)
+      service:
+        name: apache2
+        state: started
+      when: ansible_os_family == "Debian"
+      failed_when: result.rc != 0  # Fail task if service fails to start
+      retries: 3
+      delay: 5
+      until: result.state == "started"  # Retry 3 times with a 5-second delay
+      tags:
+        - apache
+
+    - name: Copy index.html to the web server
+      copy:
+        src: /opt/ansible/index.html
+        dest: /var/www/html/index.html
+        mode: '0666'
+      notify:
+        - Restart Apache service
+      failed_when: result.rc != 0  # Fail task if file copy fails
+      tags:
+        - apache
+
+  handlers:
+    - name: Restart Apache HTTPD service (RedHat-based systems)
+      service:
+        name: httpd
+        state: restarted
+      when: ansible_os_family == "RedHat"
+      failed_when: result.rc != 0  # Fail task if service fails to restart
+      tags:
+        - apache
+
+    - name: Restart Apache2 service (Debian-based systems)
+      service:
+        name: apache2
+        state: restarted
+      when: ansible_os_family == "Debian"
+      failed_when: result.rc != 0  # Fail task if service fails to restart
+      tags:
+        - apache
+```
+
