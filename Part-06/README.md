@@ -133,3 +133,31 @@ github_token: "your_github_personal_access_token"
 ansible-playbook github_clone.yml --ask-vault-pass
 ```
 - --ask-vault-pass: This flag will prompt you to enter the vault password in order to decrypt secrets.yml and access the GitHub credentials.
+
+# Ansible Roles
+
+## What are Ansible Roles?
+
+An Ansible role is a way to organize tasks. Each role has a set of instructions (tasks) that do something specific, like setting up a web server or installing a database. You can use roles in multiple playbooks, so you don’t have to write the same tasks again and again.
+
+## What’s in a Role?
+
+Each role is made of different folders and files:
+
+1. **tasks/**: This folder contains the list of actions to be done (like installing packages).
+2. **handlers/**: This folder contains tasks that only run when something important changes (like restarting a service).
+3. **defaults/**: Here you set default settings for the role.
+4. **vars/**: This folder holds variables (values) that the role will use.
+5. **files/**: This folder holds files that you want to copy to the target server.
+6. **templates/**: This folder holds templates to create files with dynamic values.
+7. **meta/**: This file tells information about the role, like other roles it depends on.
+
+## How to Use Roles in a Playbook
+
+### Step 1: Install or Clone the Role
+
+If the role is available online, you can install it using the `ansible-galaxy` command:
+
+```bash
+ansible-galaxy install username.role_name
+```
